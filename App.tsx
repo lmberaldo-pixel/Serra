@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react';
 import { ServiceCategory, ServiceRequest } from './types';
+import { supabase } from './supabaseClient';
 
 const WHATSAPP_NUMBER = "5511970210989";
 const WEBHOOK_URL = "https://hook.us2.make.com/y3r9f3q3tled8wlycdwn3wktxy2swnyi";
@@ -44,9 +45,26 @@ const App: React.FC = () => {
     setPopupData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleWhatsAppRedirect = (e: React.FormEvent) => {
+  const handleWhatsAppRedirect = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // Try to save to Supabase "orcamentos" table (fire and forget logic to not delay user)
+    try {
+      supabase.from('orcamentos').insert([
+        { 
+          client_name: formData.clientName,
+          phone: formData.phone,
+          service_type: formData.serviceType,
+          description: formData.description,
+          created_at: new Date()
+        }
+      ]).then(({ error }) => {
+        if (error) console.error("Erro ao salvar no Supabase:", error);
+      });
+    } catch (err) {
+      console.error("Erro de conexão Supabase:", err);
+    }
 
     const message = `*Solicitação de Orçamento - Serralheria Delivery*%0A%0A` +
       `*Cliente:* ${formData.clientName}%0A` +
@@ -68,7 +86,8 @@ const App: React.FC = () => {
     setIsRegistering(true);
 
     try {
-      await fetch(WEBHOOK_URL, {
+      // 1. Send to Webhook (Make.com) as requested
+      const webhookPromise = fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,11 +95,22 @@ const App: React.FC = () => {
         body: JSON.stringify(popupData),
       });
 
+      // 2. Save to Supabase "leads" table
+      const supabasePromise = supabase.from('leads').insert([
+        { 
+          name: popupData.name, 
+          whatsapp: popupData.whatsapp,
+          created_at: new Date()
+        }
+      ]);
+
+      await Promise.allSettled([webhookPromise, supabasePromise]);
+
       alert("Solicitação enviada com sucesso!");
       setIsModalOpen(false);
       setPopupData({ name: '', whatsapp: '' });
     } catch (error) {
-      console.error("Erro ao enviar cadastro:", error);
+      console.error("Erro ao processar solicitação:", error);
       alert("Ocorreu um erro ao enviar. Verifique sua conexão e tente novamente.");
     } finally {
       setIsRegistering(false);
