@@ -17,6 +17,7 @@ import {
 import { ServiceCategory, ServiceRequest } from './types';
 
 const WHATSAPP_NUMBER = "5511970210989";
+const WEBHOOK_URL = "https://hook.us2.make.com/y3r9f3q3tled8wlycdwn3wktxy2swnyi";
 
 const App: React.FC = () => {
   const [formData, setFormData] = useState<ServiceRequest>({
@@ -29,6 +30,7 @@ const App: React.FC = () => {
   // State for the Registration Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [popupData, setPopupData] = useState({ name: '', whatsapp: '' });
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,17 +63,28 @@ const App: React.FC = () => {
     }, 800);
   };
 
-  const handlePopupSubmit = (e: React.FormEvent) => {
+  const handlePopupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const message = `*Novo Cadastro de Cliente*%0A%0A` +
-      `*Nome:* ${popupData.name}%0A` +
-      `*WhatsApp:* ${popupData.whatsapp}%0A` +
-      `Gostaria de receber novidades e ofertas.`;
-    
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    setIsModalOpen(false);
-    setPopupData({ name: '', whatsapp: '' });
+    setIsRegistering(true);
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(popupData),
+      });
+
+      alert("Solicitação enviada com sucesso!");
+      setIsModalOpen(false);
+      setPopupData({ name: '', whatsapp: '' });
+    } catch (error) {
+      console.error("Erro ao enviar cadastro:", error);
+      alert("Ocorreu um erro ao enviar. Verifique sua conexão e tente novamente.");
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -343,7 +356,7 @@ const App: React.FC = () => {
                <div className="inline-block bg-amber-500 p-3 rounded-2xl mb-4 relative z-10 shadow-lg shadow-amber-500/20">
                  <UserPlus size={32} className="text-slate-900" />
                </div>
-               <h3 className="text-2xl font-bold text-white relative z-10">Cadastre-se</h3>
+               <h3 className="text-2xl font-bold text-white relative z-10">Aguardar Contato</h3>
                <p className="text-slate-400 text-sm mt-2 relative z-10">Receba ofertas exclusivas e atendimento prioritário.</p>
             </div>
 
@@ -375,10 +388,20 @@ const App: React.FC = () => {
                 </div>
                 <button 
                   type="submit"
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+                  disabled={isRegistering}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <UserPlus size={18} className="text-amber-500" />
-                  Cadastrar Agora
+                  {isRegistering ? (
+                    <span className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Enviando...
+                    </span>
+                  ) : (
+                    <>
+                      <UserPlus size={18} className="text-amber-500" />
+                      Solicitar Contato
+                    </>
+                  )}
                 </button>
               </form>
             </div>
