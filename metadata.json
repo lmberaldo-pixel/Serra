@@ -1,0 +1,5 @@
+{
+  "name": "Serralheria",
+  "description": "Um aplicativo profissional para solicitação de pequenos reparos de serralheria, como portões, fechaduras e serviços de solda, com envio direto para o WhatsApp.",
+  "requestFramePermissions": []
+}
