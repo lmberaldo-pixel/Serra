@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Wrench, 
@@ -440,14 +439,14 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Registration Button (Left Side) */}
-      <div className="fixed bottom-6 left-6 z-40">
+      <div className="fixed bottom-24 left-6 z-40">
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-slate-900 text-amber-500 h-14 px-6 rounded-full shadow-2xl flex items-center gap-3 transition-transform active:scale-90 hover:bg-slate-800 border-2 border-amber-500/50"
-          aria-label="Cadastre-se"
+          aria-label="Entre em contato comigo"
         >
-          <UserPlus size={24} />
-          <span className="font-bold text-sm uppercase tracking-wide hidden md:inline">Cadastre-se</span>
+          <Phone size={24} />
+          <span className="font-bold text-sm uppercase tracking-wide hidden md:inline">Entre em contato comigo</span>
         </button>
       </div>
 
