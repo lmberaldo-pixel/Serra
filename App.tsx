@@ -337,21 +337,6 @@ const App: React.FC = () => {
                       </>
                     )}
                   </button>
-                  
-                  <div className="flex items-center gap-4 py-2">
-                    <div className="h-px bg-slate-200 flex-1"></div>
-                    <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Ou</span>
-                    <div className="h-px bg-slate-200 flex-1"></div>
-                  </div>
-
-                  <button 
-                    type="button"
-                    onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-slate-900 text-amber-500 hover:bg-slate-800 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg transition-all duration-300 active:scale-[0.98] border border-slate-800"
-                  >
-                    <Phone size={20} />
-                    Entre em contato comigo
-                  </button>
 
                   <p className="text-center text-[11px] text-slate-400 font-medium">
                     Sem compromisso. Resposta rápida garantida.
