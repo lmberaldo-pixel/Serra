@@ -82,13 +82,18 @@ const App: React.FC = () => {
       `*Categoria:* ${formData.serviceType}%0A` +
       `*Descrição:* ${formData.description}`;
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    // Detection logic
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    // Simulate some feedback before redirecting
-    setTimeout(() => {
-      window.open(whatsappUrl, '_blank');
-      setIsSubmitting(false);
-    }, 800);
+    if (isMobile) {
+      // Direct protocol for mobile app
+      window.location.href = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${message}`;
+    } else {
+      // Direct WhatsApp Web URL for desktop to bypass intermediate landing page
+      window.open(`https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${message}`, '_blank');
+    }
+
+    setIsSubmitting(false);
   };
 
   const handlePopupSubmit = async (e: React.FormEvent) => {
