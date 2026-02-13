@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Wrench, 
-  ShieldCheck, 
-  Hammer, 
-  Phone, 
-  User, 
-  MessageSquare, 
+import {
+  Wrench,
+  ShieldCheck,
+  Hammer,
+  Phone,
+  User,
+  MessageSquare,
   CheckCircle2,
   MapPin,
   Bike,
@@ -20,9 +20,9 @@ const WHATSAPP_NUMBER = "5511970210989";
 const WEBHOOK_URL = "https://hook.us2.make.com/y3r9f3q3tled8wlycdwn3wktxy2swnyi";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="currentColor" 
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
     className={className}
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -38,6 +38,15 @@ const App: React.FC = () => {
     serviceType: ServiceCategory.PORTAO
   });
 
+  const resetForm = () => {
+    setFormData({
+      clientName: '',
+      phone: '',
+      description: '',
+      serviceType: ServiceCategory.PORTAO
+    });
+  };
+
   // State for the Registration Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [popupData, setPopupData] = useState({ name: '', whatsapp: '' });
@@ -47,11 +56,54 @@ const App: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'phone') {
+      // Remove non-numbers
+      const numbersOnly = value.replace(/\D/g, '');
+      // Limit to 11 digits (DDD + 9 digits)
+      const limitedValue = numbersOnly.slice(0, 11);
+
+      // Basic Mask: (XX) XXXXX-XXXX
+      let maskedValue = limitedValue;
+      if (limitedValue.length > 0) {
+        maskedValue = '(' + limitedValue;
+      }
+      if (limitedValue.length > 2) {
+        maskedValue = '(' + limitedValue.slice(0, 2) + ') ' + limitedValue.slice(2);
+      }
+      if (limitedValue.length > 7) {
+        maskedValue = '(' + limitedValue.slice(0, 2) + ') ' + limitedValue.slice(2, 7) + '-' + limitedValue.slice(7);
+      }
+
+      setFormData(prev => ({ ...prev, [name]: maskedValue }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePopupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'whatsapp') {
+      const numbersOnly = value.replace(/\D/g, '');
+      const limitedValue = numbersOnly.slice(0, 11);
+
+      let maskedValue = limitedValue;
+      if (limitedValue.length > 0) {
+        maskedValue = '(' + limitedValue;
+      }
+      if (limitedValue.length > 2) {
+        maskedValue = '(' + limitedValue.slice(0, 2) + ') ' + limitedValue.slice(2);
+      }
+      if (limitedValue.length > 7) {
+        maskedValue = '(' + limitedValue.slice(0, 2) + ') ' + limitedValue.slice(2, 7) + '-' + limitedValue.slice(7);
+      }
+
+      setPopupData(prev => ({ ...prev, [name]: maskedValue }));
+      return;
+    }
+
     setPopupData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -62,7 +114,7 @@ const App: React.FC = () => {
     // Try to save to Supabase "orcamentos" table (fire and forget logic to not delay user)
     try {
       supabase.from('orcamentos').insert([
-        { 
+        {
           client_name: formData.clientName,
           phone: formData.phone,
           service_type: formData.serviceType,
@@ -84,7 +136,7 @@ const App: React.FC = () => {
 
     // Detection logic
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
+
     if (isMobile) {
       // Direct protocol for mobile app
       window.location.href = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${message}`;
@@ -112,8 +164,8 @@ const App: React.FC = () => {
 
       // 2. Save to Supabase "leads" table
       const supabasePromise = supabase.from('leads').insert([
-        { 
-          name: popupData.name, 
+        {
+          name: popupData.name,
           whatsapp: popupData.whatsapp,
           created_at: new Date()
         }
@@ -150,9 +202,9 @@ const App: React.FC = () => {
               Reparos Rápidos e Confiáveis
             </p>
           </div>
-          
+
           <div className="mt-3 flex items-center justify-center gap-4 text-[10px] md:text-xs text-slate-500 border-t border-slate-800/50 pt-2 w-full max-w-xs">
-            <span className="flex items-center gap-1.5"><MapPin size={12} className="text-amber-500/70"/> Osasco e Região</span>
+            <span className="flex items-center gap-1.5"><MapPin size={12} className="text-amber-500/70" /> Osasco e Região</span>
           </div>
         </div>
       </header>
@@ -160,13 +212,13 @@ const App: React.FC = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative h-[450px] flex items-center justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=2070&auto=format&fit=crop" 
+          <img
+            src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=2070&auto=format&fit=crop"
             className="absolute inset-0 w-full h-full object-cover grayscale brightness-50"
             alt="Welding Background"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/80 to-slate-900"></div>
-          
+
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <div className="inline-block bg-amber-500 text-slate-900 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4 animate-pulse">
               Atendimento Expresso
@@ -224,13 +276,13 @@ const App: React.FC = () => {
               <div className="lg:w-[35%] bg-slate-900 p-10 text-white flex flex-col justify-between relative overflow-hidden">
                 {/* Decorative element */}
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"></div>
-                
+
                 <div className="relative z-10">
                   <h3 className="text-3xl font-bold mb-6">Orçamento Rápido</h3>
                   <p className="text-slate-400 text-base mb-8 leading-relaxed">
                     Estamos prontos para atender seu chamado. Descreva o serviço e receba um retorno imediato.
                   </p>
-                  
+
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 group">
                       <div className="bg-amber-500/20 p-3 rounded-xl group-hover:bg-amber-500 transition-colors">
@@ -254,7 +306,7 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="relative z-10 mt-12 pt-8 border-t border-slate-800">
-                   <p className="text-xl md:text-2xl text-white font-bold leading-relaxed">"Atendimento de moto para atender você mais rápido"</p>
+                  <p className="text-xl md:text-2xl text-white font-bold leading-relaxed">"Atendimento de moto para atender você mais rápido"</p>
                 </div>
               </div>
 
@@ -265,9 +317,9 @@ const App: React.FC = () => {
                       <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         <User size={16} className="text-amber-500" /> Seu Nome
                       </label>
-                      <input 
+                      <input
                         required
-                        type="text" 
+                        type="text"
                         name="clientName"
                         value={formData.clientName}
                         onChange={handleInputChange}
@@ -279,9 +331,9 @@ const App: React.FC = () => {
                       <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         <Phone size={16} className="text-amber-500" /> WhatsApp
                       </label>
-                      <input 
+                      <input
                         required
-                        type="tel" 
+                        type="tel"
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
@@ -295,7 +347,7 @@ const App: React.FC = () => {
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                       <Wrench size={16} className="text-amber-500" /> Categoria do Serviço
                     </label>
-                    <select 
+                    <select
                       name="serviceType"
                       value={formData.serviceType}
                       onChange={handleInputChange}
@@ -314,7 +366,7 @@ const App: React.FC = () => {
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                       <MessageSquare size={16} className="text-amber-500" /> O que você precisa?
                     </label>
-                    <textarea 
+                    <textarea
                       required
                       name="description"
                       value={formData.description}
@@ -325,23 +377,34 @@ const App: React.FC = () => {
                     ></textarea>
                   </div>
 
-                  <button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-green-600/20 hover:shadow-green-600/30 transition-all duration-300 active:scale-[0.98] disabled:opacity-70"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-3">
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                        Enviando...
-                      </span>
-                    ) : (
-                      <>
-                        <WhatsAppIcon className="w-6 h-6" />
-                        Solicitar Orçamento
-                      </>
-                    )}
-                  </button>
+                  <div className="space-y-4">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-green-600/20 hover:shadow-green-600/30 transition-all duration-300 active:scale-[0.98] disabled:opacity-70"
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-3">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                          Enviando...
+                        </span>
+                      ) : (
+                        <>
+                          <WhatsAppIcon className="w-6 h-6" />
+                          Solicitar Orçamento
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98]"
+                    >
+                      <X size={18} />
+                      Limpar Dados
+                    </button>
+                  </div>
 
                   <p className="text-center text-[11px] text-slate-400 font-medium">
                     Sem compromisso. Resposta rápida garantida.
@@ -366,7 +429,7 @@ const App: React.FC = () => {
                 Especialistas em reparos rápidos de serralheria residencial e comercial. Soldas, portões e segurança.
               </p>
             </div>
-            
+
             <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
               <a href="#" className="hover:text-amber-500 transition-colors uppercase tracking-widest">Início</a>
               <a href="#orcamento" className="hover:text-amber-500 transition-colors uppercase tracking-widest">Orçamento</a>
@@ -385,37 +448,37 @@ const App: React.FC = () => {
 
       {/* Registration Modal Popup */}
       {isModalOpen && (
-        <div 
+        <div
           onClick={() => setIsModalOpen(false)}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 relative"
           >
-            <button 
+            <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 z-20 text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full"
             >
               <X size={20} />
             </button>
-            
+
             <div className="bg-slate-900 p-8 text-center relative overflow-hidden">
-               <div className="absolute -left-10 -top-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl"></div>
-               <div className="inline-block bg-amber-500 p-3 rounded-2xl mb-4 relative z-10 shadow-lg shadow-amber-500/20">
-                 <UserPlus size={32} className="text-slate-900" />
-               </div>
-               <h3 className="text-2xl font-bold text-white relative z-10">Aguardar Contato</h3>
-               <p className="text-slate-400 text-sm mt-2 relative z-10">Receba ofertas exclusivas e atendimento prioritário.</p>
+              <div className="absolute -left-10 -top-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl"></div>
+              <div className="inline-block bg-amber-500 p-3 rounded-2xl mb-4 relative z-10 shadow-lg shadow-amber-500/20">
+                <UserPlus size={32} className="text-slate-900" />
+              </div>
+              <h3 className="text-2xl font-bold text-white relative z-10">Aguardar Contato</h3>
+              <p className="text-slate-400 text-sm mt-2 relative z-10">Receba ofertas exclusivas e atendimento prioritário.</p>
             </div>
 
             <div className="p-8">
               <form onSubmit={handlePopupSubmit} className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Seu Nome</label>
-                  <input 
+                  <input
                     required
-                    type="text" 
+                    type="text"
                     name="name"
                     value={popupData.name}
                     onChange={handlePopupChange}
@@ -425,9 +488,9 @@ const App: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">WhatsApp</label>
-                  <input 
+                  <input
                     required
-                    type="tel" 
+                    type="tel"
                     name="whatsapp"
                     value={popupData.whatsapp}
                     onChange={handlePopupChange}
@@ -435,7 +498,7 @@ const App: React.FC = () => {
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all bg-slate-50"
                   />
                 </div>
-                <button 
+                <button
                   type="submit"
                   disabled={isRegistering}
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
@@ -460,7 +523,7 @@ const App: React.FC = () => {
 
       {/* Floating Budget CTA (Right Side - Mobile Only) */}
       <div className="md:hidden fixed bottom-6 right-6 z-40">
-        <button 
+        <button
           onClick={() => document.getElementById('orcamento')?.scrollIntoView({ behavior: 'smooth' })}
           className="bg-amber-500 text-slate-900 h-16 w-16 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90 animate-bounce shadow-amber-500/40"
           aria-label="Pedir Orçamento"
